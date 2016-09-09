@@ -131,6 +131,7 @@ public class PriamConfiguration implements IConfiguration
     private static final String CONFIG_COMMITLOG_RESTORE_POINT_IN_TIME = PRIAM_PRE + ".clbackup.restoreTime";
     private static final String CONFIG_COMMITLOG_RESTORE_MAX = PRIAM_PRE + ".clrestore.max";
     private static final String CONFIG_CLIENT_SSL_ENABLED = PRIAM_PRE + ".client.sslEnabled";
+    private static final String CONFIG_CLIENT_SSL_OPTIONAL = PRIAM_PRE + ".client.sslOptional";
     private static final String CONFIG_INTERNODE_ENCRYPTION = PRIAM_PRE + ".internodeEncryption";
     private static final String CONFIG_DSNITCH_ENABLED = PRIAM_PRE + ".dsnitchEnabled";
 
@@ -943,6 +944,11 @@ public class PriamConfiguration implements IConfiguration
     public boolean isClientSslEnabled()
     {
         return config.get(CONFIG_CLIENT_SSL_ENABLED, false);
+    }
+
+    public boolean isClientSslOptional()
+    {
+        return config.get(CONFIG_CLIENT_SSL_OPTIONAL, false);
     }
 
    public String getInternodeEncryption()

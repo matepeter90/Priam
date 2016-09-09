@@ -456,6 +456,7 @@ public interface IConfiguration
     public void setRestoreKeySpaces(List<String> keyspaces);
 
     public boolean isClientSslEnabled();
+    public boolean isClientSslOptional();
 
     public String getInternodeEncryption();
 

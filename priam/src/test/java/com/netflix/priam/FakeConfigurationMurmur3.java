@@ -537,6 +537,11 @@ public class FakeConfigurationMurmur3 implements IConfiguration
         return true;
     }
 
+    public boolean isClientSslOptional()
+    {
+        return false;
+    }
+
     public String getInternodeEncryption()
     {
         return "all";
