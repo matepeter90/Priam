@@ -445,6 +445,8 @@ public interface IConfiguration
     public String getCommitLogBackupRestoreFromDirs();
 
     public String getCommitLogBackupRestorePointInTime();
+
+    public List<String> getExcludedKeyspaces();
     
     public int maxCommitLogsRestore();
 

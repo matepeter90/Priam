@@ -106,6 +106,7 @@ public class PriamConfiguration implements IConfiguration
     private static final String CONFIG_RESTORE_KEYSPACES = PRIAM_PRE + ".restore.keyspaces";
     private static final String CONFIG_BACKUP_CHUNK_SIZE = PRIAM_PRE + ".backup.chunksizemb";
     private static final String CONFIG_BACKUP_RETENTION = PRIAM_PRE + ".backup.retention";
+    private static final String CONFIG_EXCLUDED_KEYSPACES = PRIAM_PRE + ".backup.excluded.keyspaces";
     private static final String CONFIG_BACKUP_RACS = PRIAM_PRE + ".backup.racs";
     private static final String CONFIG_MULTITHREADED_COMPACTION = PRIAM_PRE + ".multithreaded.compaction";
     private static final String CONFIG_STREAMING_THROUGHPUT_MB = PRIAM_PRE + ".streaming.throughput.mb";
@@ -213,6 +214,7 @@ public class PriamConfiguration implements IConfiguration
     public static final String DEFAULT_AUTHENTICATOR = "org.apache.cassandra.auth.AllowAllAuthenticator";
     public static final String DEFAULT_AUTHORIZER = "org.apache.cassandra.auth.AllowAllAuthorizer";
     public static final String DEFAULT_COMMITLOG_PROPS_FILE = "/conf/commitlog_archiving.properties";
+    public static final List<String> DEFAULT_EXCLUDED_KEYSPACES = ImmutableList.of("OpsCenter");
 
     // rpm based. Can be modified for tar based.
     private final String DEFAULT_CASS_HOME_DIR = "/etc/cassandra";
@@ -467,6 +469,12 @@ public class PriamConfiguration implements IConfiguration
     public List<String> getBackupRacs()
     {
         return config.getList(CONFIG_BACKUP_RACS);
+    }
+
+    @Override
+    public List<String> getExcludedKeyspaces()
+    {
+        return config.getList(CONFIG_EXCLUDED_KEYSPACES, DEFAULT_EXCLUDED_KEYSPACES);
     }
 
     @Override

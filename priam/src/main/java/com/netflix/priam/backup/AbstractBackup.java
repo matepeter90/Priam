@@ -43,7 +43,7 @@ import com.netflix.priam.utils.RetryableCallable;
 public abstract class AbstractBackup extends Task
 {
     private static final Logger logger = LoggerFactory.getLogger(AbstractBackup.class);
-    protected final List<String> FILTER_KEYSPACE = Arrays.asList("OpsCenter");
+    protected final List<String> FILTER_KEYSPACE = config.getExcludedKeyspaces();
     protected final Map<String, List<String>> FILTER_COLUMN_FAMILY = ImmutableMap.of("system", Arrays.asList("local", "peers", "LocationInfo")); 
     protected final Provider<AbstractBackupPath> pathFactory;
     protected IBackupFileSystem fs;

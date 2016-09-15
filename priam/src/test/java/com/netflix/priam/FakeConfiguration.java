@@ -523,6 +523,8 @@ public class FakeConfiguration implements IConfiguration
         return null;
     }
 
+    public List<String> getExcludedKeyspaces() { return PriamConfiguration.DEFAULT_EXCLUDED_KEYSPACES; }
+
     public void setRestoreKeySpaces(List<String> keyspaces) {
             
     }
