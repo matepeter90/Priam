@@ -466,11 +466,11 @@ public class CassandraAdmin
                 String[] kv = line.split(":");
                 kv[0] = kv[0].trim();
                 if (kv[0].equals("STATUS")) {
-                	obj.put(kv[0], kv[1]);
-                	String[] vv = kv[1].split(",");
+                	obj.put(kv[0], kv[kv.length - 1]);
+                	String[] vv = kv[kv.length - 1].split(",");
                 	obj.put("Token", vv[1]);
                 } else {
-                   obj.put(kv[0], kv[1]);
+                   obj.put(kv[0], kv[kv.length - 1]);
                 }
             } 
         }
