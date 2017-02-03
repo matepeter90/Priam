@@ -303,6 +303,68 @@ public class AWSMembership implements IMembership
         }
     }
 
+    /**
+     * Get ACLs in a map
+     */
+    public Map<Integer, List<String>> getACLMap()
+    {
+        AmazonEC2 client = null;
+        try
+        {
+            client = getEc2Client();
+            Map<Integer, List<String>> aclMap = new HashMap<>();
+
+            if (this.insEnvIdentity.isClassic()) {
+
+                DescribeSecurityGroupsRequest req = new DescribeSecurityGroupsRequest().withGroupNames(Arrays.asList(config.getACLGroupName()));
+                DescribeSecurityGroupsResult result = client.describeSecurityGroups(req);
+                for (SecurityGroup group : result.getSecurityGroups())
+                    for (IpPermission perm : group.getIpPermissions())
+                        if (perm.getFromPort() == perm.getToPort())
+                        {
+                            if(aclMap.get(perm.getFromPort()) == null)
+                                aclMap.put(perm.getFromPort(), new ArrayList<String>());
+                            aclMap.get(perm.getFromPort()).addAll(perm.getIpRanges());
+                        }
+                        else
+                            logger.debug("Skipping ip permission with port range");
+
+                logger.info("Fetch current permissions for classic env of running instance");
+            } else {
+
+                Filter nameFilter = new Filter().withName("group-name").withValues(config.getACLGroupName());
+                String vpcid = config.getVpcId();
+                if (vpcid == null || vpcid.isEmpty()) {
+                    throw new IllegalStateException("vpcid is null even though instance is running in vpc.");
+                }
+
+                Filter vpcFilter = new Filter().withName("vpc-id").withValues(vpcid); //only fetch SG for the vpc id of the running instance
+                DescribeSecurityGroupsRequest req = new DescribeSecurityGroupsRequest().withFilters(nameFilter, vpcFilter);
+                DescribeSecurityGroupsResult result = client.describeSecurityGroups(req);
+                for (SecurityGroup group : result.getSecurityGroups())
+                    for (IpPermission perm : group.getIpPermissions())
+                        if (perm.getFromPort() == perm.getToPort())
+                        {
+                            if(aclMap.get(perm.getFromPort()) == null)
+                                aclMap.put(perm.getFromPort(), new ArrayList<String>());
+                            aclMap.get(perm.getFromPort()).addAll(perm.getIpRanges());
+                        }
+                        else
+                            logger.debug("Skipping ip permission with port range");
+
+                logger.info("Fetch current permissions for vpc env of running instance");
+            }
+
+
+            return aclMap;
+        }
+        finally
+        {
+            if (client != null)
+                client.shutdown();
+        }
+    }
+
     @Override
     public void expandRacMembership(int count)
     {

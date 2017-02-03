@@ -1,8 +1,6 @@
 package com.netflix.priam;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
@@ -180,6 +178,9 @@ public class FakeConfigurationMurmur3 implements IConfiguration
     {
         return this.getAppName();
     }
+
+    @Override
+    public HashSet<Integer> getAdditionalPorts() { return null; }
 
     @Override
     public int getMaxBackupUploadThreads()

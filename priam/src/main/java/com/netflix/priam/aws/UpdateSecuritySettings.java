@@ -15,11 +15,9 @@
  */
 package com.netflix.priam.aws;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
+import com.google.api.client.repackaged.com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -39,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * across the regions.
  * 
  * Requirement: 1) Nodes in the same region needs to be able to talk to each
- * other. 2) Nodes in other regions needs to be able to talk to t`he others in
+ * other. 2) Nodes in other regions needs to be able to talk to the others in
  * the other region.
  * 
  * Assumption: 1) IPriamInstanceFactory will provide the membership... and will
@@ -77,23 +75,27 @@ public class UpdateSecuritySettings extends Task
     public void execute()
     {
         // if seed dont execute.
-        int port = config.getSSLStoragePort();
-        List<String> acls = membership.listACL(port, port);
+        HashSet<Integer> port_list = new HashSet<>();
+        port_list.add(config.getSSLStoragePort());
+        port_list.addAll(config.getAdditionalPorts());
+
         List<PriamInstance> instances = factory.getAllIds(config.getAppName());
 
-        // iterate to add...
-        Set<String> add = new HashSet<String>();
-        List<PriamInstance> allInstances = factory.getAllIds(config.getAppName());
-        for (PriamInstance instance : allInstances)
+        //Cleanup unused ports from ACLs
+        HashMap<Integer, List<String>> toCleanUp = new HashMap<>();
+        Map<Integer, List<String>> aclMap = membership.getACLMap();
+        for (Integer port : aclMap.keySet())
         {
-            String range = instance.getHostIP() + "/32";
-            if (!acls.contains(range))
-                add.add(range);
+            if(!port_list.contains(port))
+               toCleanUp.put(port, aclMap.get(port));
         }
-        if (add.size() > 0)
+
+        if(toCleanUp.size() > 0)
         {
-            membership.addACL(add, port, port);
-            firstTimeUpdated = true;
+            for (Map.Entry<Integer, List<String>> acl: toCleanUp.entrySet())
+            {
+                membership.removeACL(acl.getValue(), acl.getKey(), acl.getKey());
+            }
         }
 
         // just iterate to generate ranges.
@@ -104,15 +106,30 @@ public class UpdateSecuritySettings extends Task
             currentRanges.add(range);
         }
 
-        // iterate to remove...
-        List<String> remove = Lists.newArrayList();
-        for (String acl : acls)
-            if (!currentRanges.contains(acl)) // if not found then remove....
-                remove.add(acl);
-        if (remove.size() > 0)
-        {
-            membership.removeACL(remove, port, port);
-            firstTimeUpdated = true;
+        for (int port : port_list) {
+            List<String> acls = Optional.fromNullable(membership.listACL(port, port)).or(new ArrayList<String>());
+            // iterate to add...
+            List<String> toBeAdded = Lists.newArrayList();
+
+            for (PriamInstance instance : instances) {
+                String range = instance.getHostIP() + "/32";
+                if (!acls.contains(range))
+                    toBeAdded.add(range);
+            }
+            if (toBeAdded.size() > 0) {
+                membership.addACL(toBeAdded, port, port);
+                firstTimeUpdated = true;
+            }
+
+            // iterate to remove...
+            List<String> toBeRemoved = Lists.newArrayList();
+            for (String acl : acls)
+                if (!currentRanges.contains(acl)) // if not found then remove....
+                    toBeRemoved.add(acl);
+            if (toBeRemoved.size() > 0) {
+                membership.removeACL(toBeRemoved, port, port);
+                firstTimeUpdated = true;
+            }
         }
     }
 

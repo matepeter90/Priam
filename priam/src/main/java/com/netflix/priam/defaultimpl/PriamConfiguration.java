@@ -15,9 +15,7 @@
  */
 package com.netflix.priam.defaultimpl;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2Client;
@@ -148,6 +146,7 @@ public class PriamConfiguration implements IConfiguration
     private static final String CONFIG_AUTO_BOOTSTRAP = PRIAM_PRE + ".auto.bootstrap";
     private static final String CONFIG_DSE_CLUSTER_TYPE = PRIAM_PRE + ".dse.cluster.type";
     private static final String CONFIG_EXTRA_ENV_PARAMS = PRIAM_PRE + ".extra.env.params";
+    private static final String CONFIG_ACL_ADD_PORTS = PRIAM_PRE + ".acl.add_ports";
 
     private static final String CONFIG_US_EAST_1_S3_ENDPOINT = PRIAM_PRE + ".useast1.s3url";
     private static final String CONFIG_US_WEST_1_S3_ENDPOINT = PRIAM_PRE + ".uswest1.s3url";
@@ -218,6 +217,7 @@ public class PriamConfiguration implements IConfiguration
     public static final String DEFAULT_AUTHORIZER = "org.apache.cassandra.auth.AllowAllAuthorizer";
     public static final String DEFAULT_COMMITLOG_PROPS_FILE = "/conf/commitlog_archiving.properties";
     public static final List<String> DEFAULT_EXCLUDED_KEYSPACES = ImmutableList.of("OpsCenter");
+    public static final List<String> DEFAULT_ACL_ADD_PORTS = ImmutableList.of();
 
     // rpm based. Can be modified for tar based.
     private final String DEFAULT_CASS_HOME_DIR = "/etc/cassandra";
@@ -725,6 +725,15 @@ public class PriamConfiguration implements IConfiguration
     public boolean isIncrBackup()
     {
         return config.get(CONFIG_INCR_BK_ENABLE, true);
+    }
+
+    @Override
+    public HashSet<Integer> getAdditionalPorts()
+    {
+        HashSet<Integer> port_list = new HashSet<>();
+        for(String s : config.getList(CONFIG_ACL_ADD_PORTS, DEFAULT_ACL_ADD_PORTS))
+            port_list.add(Integer.valueOf(s));
+        return port_list;
     }
 
     @Override
