@@ -20,6 +20,7 @@ import com.netflix.priam.defaultimpl.PriamConfiguration;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashSet;
 
 /**
  * Interface for Priam's configuration
@@ -285,6 +286,11 @@ public interface IConfiguration
      * Get the security group associated with nodes in this cluster
      */
     public String getACLGroupName();
+
+    /**
+     * Get additional ports to add for the security groups
+     */
+    public HashSet<Integer> getAdditionalPorts();
 
     /**
      * @return true if incremental backups are enabled

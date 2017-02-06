@@ -15,10 +15,7 @@
  */
 package com.netflix.priam.cli;
 
-import java.util.Properties;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Collection;
+import java.util.*;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -113,6 +110,12 @@ public class StaticMembership implements IMembership
 
     @Override
     public List<String> listACL(int from, int to)
+    {
+        return null;
+    }
+
+    @Override
+    public HashMap<Integer, List<String>> getACLMap()
     {
         return null;
     }

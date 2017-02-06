@@ -1,6 +1,7 @@
 package com.netflix.priam;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -180,6 +181,9 @@ public class FakeConfiguration implements IConfiguration
     {
         return this.getAppName();
     }
+
+    @Override
+    public HashSet<Integer> getAdditionalPorts() { return null; }
 
     @Override
     public int getMaxBackupUploadThreads()

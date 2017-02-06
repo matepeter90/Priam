@@ -20,6 +20,7 @@ import com.netflix.priam.aws.AWSMembership;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Interface to manage membership meta information such as size of RAC, list of
@@ -78,6 +79,13 @@ public interface IMembership
      * @return
      */
     public List<String> listACL(int from, int to);
+
+    /**
+     * Get ACLs in a map, keys are the port numbers
+     *
+     * @return
+     */
+    public Map<Integer, List<String>> getACLMap();
 
     /**
      * Expand the membership size by 1.
