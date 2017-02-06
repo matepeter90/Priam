@@ -303,6 +303,24 @@ public class AWSMembership implements IMembership
         }
     }
 
+    private Map<Integer, List<String>> getMatchingACLs(DescribeSecurityGroupsResult result)
+    {
+        Map<Integer, List<String>> aclMap = new HashMap<>();
+        for (SecurityGroup group : result.getSecurityGroups())
+            for (IpPermission perm : group.getIpPermissions())
+                if (perm.getFromPort() == perm.getToPort())
+                {
+                    if(aclMap.get(perm.getFromPort()) == null)
+                        aclMap.put(perm.getFromPort(), new ArrayList<String>());
+                    aclMap.get(perm.getFromPort()).addAll(perm.getIpRanges());
+                }
+                else
+                {
+                    logger.debug("Skipping ip permission with port range");
+                }
+        return aclMap;
+    }
+
     /**
      * Get ACLs in a map
      */
@@ -312,22 +330,13 @@ public class AWSMembership implements IMembership
         try
         {
             client = getEc2Client();
-            Map<Integer, List<String>> aclMap = new HashMap<>();
+            Map<Integer, List<String>> aclMap;
 
             if (this.insEnvIdentity.isClassic()) {
 
                 DescribeSecurityGroupsRequest req = new DescribeSecurityGroupsRequest().withGroupNames(Arrays.asList(config.getACLGroupName()));
                 DescribeSecurityGroupsResult result = client.describeSecurityGroups(req);
-                for (SecurityGroup group : result.getSecurityGroups())
-                    for (IpPermission perm : group.getIpPermissions())
-                        if (perm.getFromPort() == perm.getToPort())
-                        {
-                            if(aclMap.get(perm.getFromPort()) == null)
-                                aclMap.put(perm.getFromPort(), new ArrayList<String>());
-                            aclMap.get(perm.getFromPort()).addAll(perm.getIpRanges());
-                        }
-                        else
-                            logger.debug("Skipping ip permission with port range");
+                aclMap = getMatchingACLs(result);
 
                 logger.info("Fetch current permissions for classic env of running instance");
             } else {
@@ -341,16 +350,7 @@ public class AWSMembership implements IMembership
                 Filter vpcFilter = new Filter().withName("vpc-id").withValues(vpcid); //only fetch SG for the vpc id of the running instance
                 DescribeSecurityGroupsRequest req = new DescribeSecurityGroupsRequest().withFilters(nameFilter, vpcFilter);
                 DescribeSecurityGroupsResult result = client.describeSecurityGroups(req);
-                for (SecurityGroup group : result.getSecurityGroups())
-                    for (IpPermission perm : group.getIpPermissions())
-                        if (perm.getFromPort() == perm.getToPort())
-                        {
-                            if(aclMap.get(perm.getFromPort()) == null)
-                                aclMap.put(perm.getFromPort(), new ArrayList<String>());
-                            aclMap.get(perm.getFromPort()).addAll(perm.getIpRanges());
-                        }
-                        else
-                            logger.debug("Skipping ip permission with port range");
+                aclMap = getMatchingACLs(result);
 
                 logger.info("Fetch current permissions for vpc env of running instance");
             }
